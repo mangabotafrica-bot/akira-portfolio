@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aboubacar · Akira.AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0A0C10;
+    --surface: #111318;
+    --surface2: #1A1D24;
+    --border: #252830;
+    --blue: #3B6FF0;
+    --blue-glow: rgba(59,111,240,0.15);
+    --teal: #00D4A8;
+    --teal-glow: rgba(0,212,168,0.12);
+    --text: #E8EAF0;
+    --text-muted: #6B7280;
+    --text-dim: #9CA3AF;
+    --white: #FFFFFF;
+    --green: #10B981;
+    --radius: 14px;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { height:100%; }
+
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── TOP BAR */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo-dot {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, var(--blue), var(--teal));
+    border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; font-weight: 700; color: white;
+  }
+  .logo-name { font-size: 16px; font-weight: 700; color: var(--white); }
+  .logo-sub { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+  .status-pill {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(16,185,129,0.1);
+    border: 1px solid rgba(16,185,129,0.25);
+    border-radius: 20px; padding: 5px 12px;
+    font-size: 12px; font-weight: 500; color: var(--green);
+  }
+  .status-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--green);
+    animation: blink 2s infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+  /* ── HERO INFO (collapsed on mobile) */
+  .info-strip {
+    display: flex;
+    gap: 8px;
+    padding: 12px 20px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .info-strip::-webkit-scrollbar { display: none; }
+  .info-tag {
+    white-space: nowrap;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+  .info-tag strong { color: var(--text); }
+
+  /* ── MAIN LAYOUT */
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    max-width: 680px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 16px 16px;
+  }
+
+  /* ── CHAT WINDOW */
+  .chat-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding-top: 16px;
+    gap: 12px;
+  }
+
+  .messages {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 300px;
+    max-height: 55vh;
+    overflow-y: auto;
+    padding: 4px 2px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+  .messages::-webkit-scrollbar { width: 4px; }
+  .messages::-webkit-scrollbar-track { background: transparent; }
+  .messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  /* Messages */
+  .msg { display: flex; gap: 10px; align-items: flex-start; animation: msgIn .25s ease; }
+  @keyframes msgIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+  .msg.user { flex-direction: row-reverse; }
+
+  .avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; flex-shrink: 0;
+  }
+  .msg.bot .avatar {
+    background: linear-gradient(135deg, var(--blue), var(--teal));
+    color: white;
+  }
+  .msg.user .avatar {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+  }
+
+  .bubble {
+    max-width: 78%;
+    padding: 11px 15px;
+    border-radius: 4px 14px 14px 14px;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .msg.bot .bubble {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+  .msg.user .bubble {
+    background: var(--blue);
+    color: white;
+    border-radius: 14px 4px 14px 14px;
+  }
+  .msg.system .bubble {
+    background: rgba(255,193,7,0.08);
+    border: 1px solid rgba(255,193,7,0.2);
+    color: #FFC107;
+    font-size: 12px;
+    border-radius: 8px;
+    text-align: center;
+    width: 100%;
+  }
+
+  /* Typing dots */
+  .typing { display: flex; gap: 5px; align-items: center; padding: 4px 0; }
+  .typing span {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--text-muted);
+    animation: bounce 1.2s infinite;
+  }
+  .typing span:nth-child(2) { animation-delay: .2s; }
+  .typing span:nth-child(3) { animation-delay: .4s; }
+  @keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} }
+
+  /* ── QUICK BUTTONS */
+  .quick-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+  }
+  .qbtn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    border-radius: 20px;
+    padding: 7px 14px;
+    font-size: 12px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all .15s;
+    white-space: nowrap;
+  }
+  .qbtn:hover, .qbtn:active {
+    background: var(--blue-glow);
+    border-color: var(--blue);
+    color: #7EB0FF;
+  }
+
+  /* ── INPUT AREA */
+  .input-area {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 8px 8px 8px 16px;
+    transition: border-color .2s;
+  }
+  .input-area:focus-within { border-color: var(--blue); }
+
+  .chat-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--text);
+    min-width: 0;
+  }
+  .chat-input::placeholder { color: var(--text-muted); }
+
+  .send-btn {
+    background: var(--blue);
+    border: none;
+    border-radius: 10px;
+    width: 38px; height: 38px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: all .15s;
+    flex-shrink: 0;
+  }
+  .send-btn:hover:not(:disabled) { background: #2B5FE0; transform: scale(1.05); }
+  .send-btn:disabled { background: var(--surface2); cursor: not-allowed; transform: none; }
+  .send-btn svg { width: 17px; height: 17px; fill: white; }
+
+  /* ── FOOTER */
+  .footer {
+    text-align: center;
+    padding: 14px 20px;
+    font-size: 11px;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+    margin-top: 8px;
+  }
+  .footer a { color: var(--teal); text-decoration: none; }
+
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-dot">A</div>
+    <div>
+      <div class="logo-name">Aboubacar · Akira.AI</div>
+      <div class="logo-sub">Automatisation IA · Niger</div>
+    </div>
+  </div>
+  <div class="status-pill">
+    <div class="status-dot"></div>
+    En ligne
+  </div>
+</div>
+
+<!-- INFO STRIP -->
+<div class="info-strip">
+  <div class="info-tag">📍 <strong>Doutchi, Niger</strong></div>
+  <div class="info-tag">⚙️ <strong>n8n + Groq</strong></div>
+  <div class="info-tag">✅ <strong>Upwork approuvé</strong></div>
+  <div class="info-tag">🕐 Clients dès le <strong>1er août</strong></div>
+  <div class="info-tag">💬 Répond en <strong>~2 sec</strong></div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="chat-wrap">
+
+    <!-- MESSAGES -->
+    <div class="messages" id="messages">
+      <div class="msg bot">
+        <div class="avatar">A</div>
+        <div class="bubble">Bonjour 👋 Je suis l'agent IA d'Aboubacar.<br>Je peux te renseigner sur ses services, tarifs, projets ou disponibilités. Que veux-tu savoir ?<br><br><span style="opacity:.6;font-size:13px">I also speak English 🇬🇧</span></div>
+      </div>
+    </div>
+
+    <!-- QUICK BUTTONS -->
+    <div class="quick-row" id="quickRow">
+      <button class="qbtn" onclick="sendQuick('Quels sont tes services et tarifs ?')">💼 Services & tarifs</button>
+      <button class="qbtn" onclick="sendQuick('Quand es-tu disponible pour un projet ?')">📅 Disponibilité</button>
+      <button class="qbtn" onclick="sendQuick('Parle-moi de tes projets en cours')">🚀 Projets</button>
+      <button class="qbtn" onclick="sendQuick('How much does a WhatsApp agent cost?')">🇬🇧 English</button>
+    </div>
+
+    <!-- INPUT -->
+    <div class="input-area">
+      <input
+        class="chat-input"
+        id="chatInput"
+        type="text"
+        placeholder="Pose ta question…"
+        onkeydown="if(event.key==='Enter')sendMsg()"
+        autocomplete="off"
+      />
+      <button class="send-btn" id="sendBtn" onclick="sendMsg()">
+        <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <a href="mailto:mangabot.africa@gmail.com">mangabot.africa@gmail.com</a>
+  &nbsp;·&nbsp;
+  <a href="https://wa.me/22785194227">WhatsApp +227 85 19 42 27</a>
+</div>
+
+<script>
+const WEBHOOK_URL = 'https://n8n-production-0d2a.up.railway.app/webhook/akira-portfolio';
+const sessionId = 'v-' + Math.random().toString(36).slice(2, 9);
+
+async function sendMsg() {
+  const input = document.getElementById('chatInput');
+  const btn = document.getElementById('sendBtn');
+  const quickRow = document.getElementById('quickRow');
+  const text = input.value.trim();
+  if (!text) return;
+
+  // Hide quick buttons after first message
+  quickRow.style.display = 'none';
+
+  input.value = '';
+  btn.disabled = true;
+  addMsg('user', text);
+  const tid = addTyping();
+
+  try {
+    const res = await fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: text, sessionId })
+    });
+    removeTyping(tid);
+    if (!res.ok) {
+      addMsg('system', 'Connexion temporairement indisponible. Contacte directement Aboubacar sur WhatsApp.');
+    } else {
+      const data = await res.json();
+      const reply = data.response || data.output || data.text || JSON.stringify(data);
+      addMsg('bot', reply);
+    }
+  } catch(e) {
+    removeTyping(tid);
+    addMsg('system', 'Erreur réseau. Contacte Aboubacar directement → wa.me/22785194227');
+  }
+
+  btn.disabled = false;
+  input.focus();
+}
+
+function sendQuick(text) {
+  document.getElementById('chatInput').value = text;
+  sendMsg();
+}
+
+function addMsg(type, text) {
+  const msgs = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = 'msg ' + type;
+  if (type === 'system') {
+    div.innerHTML = `<div class="bubble">${text}</div>`;
+  } else {
+    const av = type === 'bot' ? 'A' : '?';
+    div.innerHTML = `<div class="avatar">${av}</div><div class="bubble">${text.replace(/\n/g,'<br>')}</div>`;
+  }
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+let tc = 0;
+function addTyping() {
+  const id = 'ty' + (++tc);
+  const msgs = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = 'msg bot'; div.id = id;
+  div.innerHTML = `<div class="avatar">A</div><div class="bubble"><div class="typing"><span></span><span></span><span></span></div></div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return id;
+}
+function removeTyping(id) { const el = document.getElementById(id); if(el) el.remove(); }
+</script>
+</body>
+</html>
